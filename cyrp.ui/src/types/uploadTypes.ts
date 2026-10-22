@@ -1,0 +1,1 @@
+export type UploadTypes = 'no file' | 'ready' | 'uploading' | 'completed' | 'error';

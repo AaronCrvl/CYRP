@@ -22,3 +22,7 @@ CYRP is an AI-powered meeting assistant designed to turn meeting recordings and 
 - `docs/` — Project documentation and design materials.
 
 The project is under development; features and architecture may change.
+
+## Delivery plan
+
+The [four-week MVP sprint plan](docs/images/sprints/README.md) prioritizes browser-side file storage and AI workflows. The backend handles AI processing without authentication, middleware, or permanent file storage.

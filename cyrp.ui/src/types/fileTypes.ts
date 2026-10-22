@@ -1,0 +1,25 @@
+export const allowedMimeTypes = [
+    "audio/mpeg",
+    "audio/mp4",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/webm",
+    "audio/ogg",
+    "audio/aac",
+    "audio/flac",
+    "video/mp4",
+    "video/webm",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska",
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "text/plain",
+    "text/pdf",
+    "text/vtt",
+    "application/pdf",
+    "application/x-subrip",
+] as const;
+
+export type AllowedFileType = typeof allowedMimeTypes[number];
