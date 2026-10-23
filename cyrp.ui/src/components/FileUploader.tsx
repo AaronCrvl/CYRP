@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { allowedMimeTypes } from "../types/fileTypes";
 import type { UploadTypes } from "../types/uploadTypes";
+import { ClearBrowserData, SavedFilesUi } from "../db/indexedDb";
 
 type Toast = {
     type: "success" | "error";
@@ -102,6 +103,17 @@ export default function FileUploader() {
         // rename and others...
     }
 
+    const handleBrowserDataClear = () => {        
+        ClearBrowserData()
+    }   
+    
+    const handleSavedFilesUI = () : number => {        
+        const fileCount = SavedFilesUi();        
+        return fileCount == undefined && fileCount > 0 ? fileCount : 0;        
+    }
+
+    const handleSavedFiles = () => {}
+
     return (
         <div className="file-uploader w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm sm:p-8">
             {toast && (
@@ -130,6 +142,22 @@ export default function FileUploader() {
             <div className="mb-6">
                 <h1 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Upload a file</h1>
                 <p className="text-sm text-slate-500">Choose a file or drag it into the drop zone below.</p>
+            </div>
+            <div className="mb-5 flex flex-wrap gap-3">
+                <button
+                    className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    type="button"
+                    onClick={() => handleSavedFiles()}
+                >
+                    Saved Files: {handleSavedFilesUI()}
+                </button>
+                <button
+                    className="inline-flex items-center rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                    type="button"
+                    onClick={() => handleBrowserDataClear()}
+                >
+                    Clear Browser Data
+                </button>
             </div>
 
             <div
