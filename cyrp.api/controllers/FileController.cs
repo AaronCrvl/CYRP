@@ -9,40 +9,26 @@ namespace Controllers
     public class FileController : ControllerBase
     {
         private const long MaxFileSize = 25 * 1024 * 1024;
-        private OpenAIService _openAIService;
+        //private OpenAIService _openAIService;
 
-        public FileController(OpenAIService openAIService)
+        public FileController()
         {
-            this._openAIService = openAIService;
         }
 
-        [HttpGet("uploadfile")]
-        //[RequestSizeLimit(MaxFileSize)]
+        [HttpPost("uploadfile")]
+        [RequestSizeLimit(MaxFileSize)]
         public async Task<ActionResult> UploadFile(
-            [FromForm] IFormFile? file,
-            CancellationToken cancellationToken
+            [FromForm] IFormFile? file
         )
         {
             try
             {
-                // TODO 1: file data conversion to text so i can push trough API 
-                    // TODO: Validate allowed types
-                    // TODO: Create processors for every data conversion flow (audio, text and video)
-                            // TODO: Audio transcript via OpenAI                    
-                            // TODO: Text analysis
-                            // TODO: extracting audio and frames
-
-
-                // TODO 2: Transformed data adjustments for request send
-
-                // TODO 3: 
-
-                var res = await _openAIService.AskSync("testing....");
-                return Ok(res);
+                await Task.CompletedTask;
+                return Ok("Testing");
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                throw e;
+                return BadRequest();
             }
         }
     }

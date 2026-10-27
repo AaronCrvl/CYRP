@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { allowedMimeTypes } from "../types/fileTypes";
 import type { UploadTypes } from "../types/uploadTypes";
 import { ClearBrowserData, SavedFilesUi } from "../db/indexedDb";
+import { ConvertVideoFileToAudio, SendFilesToBackend } from "../services/file.service";
 
 type Toast = {
     type: "success" | "error";
@@ -44,8 +45,21 @@ export default function FileUploader() {
     }
 
     const handleFileUpload = () => {
-        if (!files?.length) {
+        if (!files?.length && files != null) {
             const message = "Select at least one supported file before submitting.";
+
+            var treatedFiles = files?.filter((file) => {
+                file.type ==
+                    "video/mp4"
+                    || "video/webm"
+                    || "video/quicktime"
+                    || "video/x-msvideo"
+                    || "video/x-matroska" ? 
+                    ConvertVideoFileToAudio(file) : file;
+            });
+
+            var result = SendFilesToBackend(files);
+
             setUploadStatus("error");
             setFileError(message);
             setToast({ type: "error", message });
@@ -103,27 +117,26 @@ export default function FileUploader() {
         // rename and others...
     }
 
-    const handleBrowserDataClear = () => {        
+    const handleBrowserDataClear = () => {
         ClearBrowserData()
-    }   
-    
-    const handleSavedFilesUI = () : number => {        
-        const fileCount = SavedFilesUi();        
-        return fileCount == undefined && fileCount > 0 ? fileCount : 0;        
     }
 
-    const handleSavedFiles = () => {}
+    const handleSavedFilesUI = (): number => {
+        const fileCount = SavedFilesUi();
+        return fileCount == undefined && fileCount > 0 ? fileCount : 0;
+    }
+
+    const handleSavedFiles = () => { }
 
     return (
         <div className="file-uploader w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm sm:p-8">
             {toast && (
                 <div className="fixed right-4 top-4 z-50 w-[calc(100%-2rem)] max-w-sm">
                     <div
-                        className={`flex items-start justify-between gap-4 rounded-xl border px-4 py-3 text-sm shadow-lg ${
-                            toast.type === "success"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                                : "border-red-200 bg-red-50 text-red-800"
-                        }`}
+                        className={`flex items-start justify-between gap-4 rounded-xl border px-4 py-3 text-sm shadow-lg ${toast.type === "success"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                            : "border-red-200 bg-red-50 text-red-800"
+                            }`}
                         role={toast.type === "error" ? "alert" : "status"}
                         aria-live={toast.type === "error" ? "assertive" : "polite"}
                     >
