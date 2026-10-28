@@ -9,7 +9,7 @@ CYRP is an AI-powered meeting assistant designed to turn meeting recordings and 
 - Generate meeting summaries, action items, and sentiment analysis with AI.
 - Receive real-time processing updates in the application.
 
-## Planned technology
+## Planned technology   
 
 - **Backend:** C# and ASP.NET Core Web API, with SignalR for real-time updates and background processing.
 - **Frontend:** React, Vite, and Tailwind CSS.
@@ -25,4 +25,8 @@ The project is under development; features and architecture may change.
 
 ## Delivery plan
 
-The [four-week MVP sprint plan](docs/images/sprints/README.md) prioritizes browser-side file storage and AI workflows. The backend handles AI processing without authentication, middleware, or permanent file storage.
+The [four-week MVP sprint plan](docs/sprints/README.md) prioritizes browser-side file storage and AI workflows. The backend handles AI processing without authentication, middleware, or permanent file storage.
+
+## Architecture Decision Records
+
+Check [CYRP_ADRs](docs/adr) for this project ADRs.
