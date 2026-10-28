@@ -1,35 +1,34 @@
-using System.Data;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using OpenAISrvc;
+using OpenAISrvc.Schemas;
 
 namespace Controllers
 {
     [Route("files")]
     [ApiController]
-    public class FileController : ControllerBase
+    public sealed class FileController : ControllerBase
     {
         private const long MaxFileSize = 25 * 1024 * 1024;
-        //private OpenAIService _openAIService;
+        private readonly OpenAIService _openAIService;
 
-        public FileController()
+        public FileController(OpenAIService openAISerivce)
         {
+            this._openAIService = openAISerivce;
         }
 
         [HttpPost("uploadfile")]
         [RequestSizeLimit(MaxFileSize)]
-        public async Task<ActionResult> UploadFile(
-            [FromForm] IFormFile? file
+        public async Task<ActionResult<AudioAnalysis>> UploadFile(
+            [FromForm] IFormFile[]? files,
+            CancellationToken cancellationToken
         )
         {
-            try
-            {
-                await Task.CompletedTask;
-                return Ok("Testing");
-            }
-            catch (Exception)
-            {
-                return BadRequest();
-            }
+            if (files == null || files.Length == 0)
+                return BadRequest("No files were added to request");
+
+            var transcription = await _openAIService.TranscribeAsync(files, cancellationToken);
+            var analysis = await _openAIService.AskingForDirections(transcription, cancellationToken);
+            return Ok(analysis);
         }
     }
 }

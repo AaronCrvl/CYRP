@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { allowedMimeTypes } from "../types/fileTypes";
 import type { UploadTypes } from "../types/uploadTypes";
+import type { AudioAnalysis } from "../types/audioAnalysis";
 import { ClearBrowserData, SavedFilesUi } from "../db/indexedDb";
 import { ConvertVideoFileToAudio, SendFilesToBackend } from "../services/file.service";
 
@@ -14,6 +15,7 @@ export default function FileUploader() {
     const [uploadStatus, setUploadStatus] = useState<UploadTypes>('no file');
     const [fileError, setFileError] = useState<string | null>(null);
     const [toast, setToast] = useState<Toast | null>(null);
+    const [analysis, setAnalysis] = useState<AudioAnalysis | null>(null);
 
     useEffect(() => {
         if (!toast) return;
@@ -32,6 +34,7 @@ export default function FileUploader() {
             );
 
             setFiles(validFiles);
+            setAnalysis(null);
             const hasInvalidFiles = validFiles.length !== selectedFiles.length;
             const errorMessage = hasInvalidFiles
                 ? "One or more files have an unsupported file type."
@@ -44,30 +47,42 @@ export default function FileUploader() {
         }
     }
 
-    const handleFileUpload = () => {
-        if (!files?.length && files != null) {
+    const handleFileUpload = async () => {
+        if (!files?.length) {
             const message = "Select at least one supported file before submitting.";
-
-            var treatedFiles = files?.filter((file) => {
-                file.type ==
-                    "video/mp4"
-                    || "video/webm"
-                    || "video/quicktime"
-                    || "video/x-msvideo"
-                    || "video/x-matroska" ? 
-                    ConvertVideoFileToAudio(file) : file;
-            });
-
-            var result = SendFilesToBackend(files);
-
             setUploadStatus("error");
             setFileError(message);
             setToast({ type: "error", message });
             return;
         }
 
-        setUploadStatus("ready");
-        setToast({ type: "success", message: "Files are ready to upload." });
+        setUploadStatus("uploading");
+        setFileError(null);
+        setAnalysis(null);
+
+        try {
+            const processedFiles: File[] = [];
+            for (const file of files) {
+                processedFiles.push(
+                    file.type.startsWith("video/")
+                        ? await ConvertVideoFileToAudio(file)
+                        : file
+                );
+            }
+
+            const result = await SendFilesToBackend(processedFiles);
+            setAnalysis(result);
+            setUploadStatus("completed");
+            setToast({ type: "success", message: "Analysis completed successfully." });
+        } catch (error) {
+            const message = error instanceof Error
+                ? error.message
+                : "Unable to upload and analyze the selected files.";
+            setUploadStatus("error");
+            setFileError(message);
+            setToast({ type: "error", message });
+            console.error("File analysis request failed.", error);
+        }
     }
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -83,6 +98,7 @@ export default function FileUploader() {
 
             if (validFiles.length > 0) {
                 setFiles((currentFiles) => [...(currentFiles ?? []), ...validFiles]);
+                setAnalysis(null);
             }
             const hasInvalidFiles = validFiles.length !== droppedFiles.length;
             const errorMessage = hasInvalidFiles
@@ -250,10 +266,77 @@ export default function FileUploader() {
                 <button
                     className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                     onClick={handleFileUpload}
+                    disabled={uploadStatus === "uploading"}
                 >
-                    Submit
+                    {uploadStatus === "uploading" ? "Analyzing..." : "Submit"}
                 </button>
             </div>
+            {analysis && (
+                <section className="mt-8 space-y-5 rounded-xl border border-slate-200 bg-white p-5" aria-live="polite">
+                    <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                            {analysis.audioType}
+                        </p>
+                        <h2 className="mt-1 text-lg font-semibold text-slate-900">Audio analysis</h2>
+                        <p className="mt-2 text-sm text-slate-700">{analysis.summary}</p>
+                    </div>
+                    {analysis.timeNotes.length > 0 && (
+                        <div>
+                            <h3 className="font-semibold text-slate-900">Time notes</h3>
+                            <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                                {analysis.timeNotes.map((note, index) => (
+                                    <li key={index}>
+                                        <span className="font-medium">{note.timestamp ?? "No timestamp"} — {note.topic}:</span>{" "}
+                                        {note.note}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {analysis.actions.length > 0 && (
+                        <div>
+                            <h3 className="font-semibold text-slate-900">Actions</h3>
+                            <ul className="mt-2 space-y-3 text-sm text-slate-700">
+                                {analysis.actions.map((action, index) => (
+                                    <li key={index}>
+                                        <p className="font-medium">
+                                            {action.title} ({action.column}, {action.priority})
+                                        </p>
+                                        <p>{action.description}</p>
+                                        {(action.owner || action.dueDate || action.timestamp) && (
+                                            <p className="text-xs text-slate-500">
+                                                {[action.owner, action.dueDate, action.timestamp].filter(Boolean).join(" · ")}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {analysis.studyNotes.length > 0 && (
+                        <div>
+                            <h3 className="font-semibold text-slate-900">Study notes</h3>
+                            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-slate-700">
+                                {analysis.studyNotes.map((note, index) => <li key={index}>{note}</li>)}
+                            </ul>
+                        </div>
+                    )}
+                    {analysis.filesToGenerate.length > 0 && (
+                        <div>
+                            <h3 className="font-semibold text-slate-900">Generated files</h3>
+                            <ul className="mt-2 space-y-3 text-sm text-slate-700">
+                                {analysis.filesToGenerate.map((file, index) => (
+                                    <li key={index}>
+                                        <p className="font-medium">{file.fileName}</p>
+                                        <p>{file.description}</p>
+                                        <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-50 p-3 text-xs">{file.content}</pre>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </section>
+            )}
         </div>
     )
 }

@@ -4,5 +4,6 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  envPrefix: 'BACKEND_',
   plugins: [react(), tailwindcss()],
 })

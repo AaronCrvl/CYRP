@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("cyrp.api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0da765f07294e38091cf0f38b58c8a59181032ed")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+86b8a9f5251f34d1617c5339e5a4885d576a6a0b")]
 [assembly: System.Reflection.AssemblyProductAttribute("cyrp.api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("cyrp.api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
