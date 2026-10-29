@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-builder.Services.AddHttpClient<OpenAIService>();
+builder.Services.AddHttpClient<OpenAISrvc.OpenAIService>();
 
 var app = builder.Build();
 

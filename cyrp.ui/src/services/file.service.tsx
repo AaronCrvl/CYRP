@@ -11,8 +11,12 @@ export async function ConvertVideoFileToAudio(file: File): Promise<File> {
     await ffmpeg.writeFile('in', await fetchFile(file));
     await ffmpeg.exec(['-i', 'in', '-vn', '-ac', '1', '-ar', '16000', '-b:a', '32k', 'out.mp3']);
     const data = await ffmpeg.readFile('out.mp3');
+    if (typeof data === 'string') {
+        throw new Error('FFmpeg returned text instead of audio data.');
+    }
+
     const audioName = file.name.replace(/\.[^.]+$/, '') + '.mp3';
-    return new File([data], audioName, { type: 'audio/mpeg' });
+    return new File([new Uint8Array(data)], audioName, { type: 'audio/mpeg' });
 }
 
 export async function SendFilesToBackend(files: File[]): Promise<AudioAnalysis> {
